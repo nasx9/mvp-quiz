@@ -207,6 +207,10 @@
     .chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 2px}
     .chip{border:1px solid var(--border);background:var(--surface-2);border-radius:999px;padding:7px 13px;font-size:12px;color:#cdcbd1}
     .section-cta{margin-top:20px;padding-top:18px;border-top:1px solid var(--border)}
+    .checkout-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .checkout-actions .btn{height:100%}
+    .btn-secondary{background:rgba(137,90,201,.10);border-color:rgba(137,90,201,.72);box-shadow:none}
+    .btn-secondary:hover{background:rgba(137,90,201,.18);border-color:var(--accent);box-shadow:0 12px 30px rgba(137,90,201,.14)}
     .diagnosis-points{display:grid;gap:10px;margin-top:16px}
     .diagnosis-point{padding:13px 14px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.018)}
     .diagnosis-point span{display:block;margin-bottom:6px;color:var(--accent);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
@@ -249,6 +253,7 @@
       .vsl-play{width:56px;height:56px}
       .event-confirmation{align-items:flex-start;flex-direction:column;gap:5px}
       .event-confirmation strong{text-align:left}
+      .checkout-actions{grid-template-columns:1fr}
       .authority{flex-direction:column;align-items:flex-start;gap:11px}
       .proof-strip{grid-template-columns:1fr 1fr;grid-template-rows:auto}
       .proof-strip figure:nth-child(3){display:none}
@@ -536,7 +541,8 @@
     /* ===== Integração (preservada do quiz original) ===== */
     const WEBHOOK='https://n8n.catapultadigital.com.br/webhook/a90eccae-c874-425f-911e-d08e1d2d0847';
     const WA='https://wa.me/556191449103';
-    const CHECKOUT_URL='https://chk.eduzz.com/89AX7X3E0D';
+    const CHECKOUT_INDIVIDUAL_URL='https://chk.eduzz.com/89AX7X3E0D';
+    const CHECKOUT_DUPLO_URL='https://chk.eduzz.com/G96RJRE5W1';
     const OBRIGADO_URL='https://lp.aceleraempresasenegocios.com.br/obg-joao-pessoa';
     const ENTRY_TOOL='Quiz Acelera';
     const ENTRY_TAG='FERR_QUIZ_ACELERA';
@@ -976,6 +982,14 @@
     }
 
     /* ===== Resultado ===== */
+    function checkoutButtons(placement){
+      const place=esc(placement||'resultado');
+      return '<div class="checkout-actions">'+
+        '<a class="btn btn-secondary" href="'+CHECKOUT_INDIVIDUAL_URL+'" target="_blank" rel="noopener" onclick="pushEvent(\'checkout_click\',{ticket_type:\'individual\',placement:\''+place+'\'})">Garantir ingresso individual ↗</a>'+
+        '<a class="btn" href="'+CHECKOUT_DUPLO_URL+'" target="_blank" rel="noopener" onclick="pushEvent(\'checkout_click\',{ticket_type:\'duplo\',placement:\''+place+'\'})">Garantir ingresso duplo ↗</a>'+
+      '</div>';
+    }
+
     function showResult(data,t,prod){
       const first=esc(data.nome.split(' ')[0]||data.nome);
       const city=getCity(),date=getDate();
@@ -991,7 +1005,6 @@
       let html='';
 
       if(selected){
-        const checkout=CHECKOUT_URL;
         const obrigado=OBRIGADO_URL;
         html=
           '<div class="result-card" style="border-color:var(--accent)">'+
@@ -1000,7 +1013,7 @@
             '<div class="event-confirmation"><span>Próxima edição</span><strong>'+esc(city)+' · '+esc(date)+' · 14 às 20h'+'</strong></div>'+
             '<p class="lede">'+first+', você foi selecionado porque demonstrou postura empreendedora, presença confirmada e abertura para implementar novas estratégias de crescimento.</p>'+
             '</div>'+
-            '<div class="section-cta"><a class="btn" href="'+checkout+'" target="_blank" rel="noopener">Quero garantir minha vaga em João Pessoa ↗</a></div>'+
+            '<div class="section-cta">'+checkoutButtons('selecionado_topo')+'</div>'+
           '</div>'+
           vslBlock({selected:true,ctaHref:obrigado,ctaLabel:'Concluir minha confirmação ↗',eventCity:city,eventDate:date,eventChallenge:desafio})+
           '<div class="result-card" style="margin-top:16px">'+
@@ -1008,7 +1021,7 @@
             '<h1 class="title" style="font-size:clamp(28px,5.5vw,40px)">'+esc(diag.profileName)+'</h1>'+
             '<p class="lede">'+first+', '+esc(diag.main)+'</p></div>'+chips+diagnosisPoints+
             '<div class="diagnosis-note">'+esc(diag.note)+'</div>'+
-            '<div class="section-cta"><a class="btn" href="'+checkout+'" target="_blank" rel="noopener">Quero garantir minha vaga em João Pessoa ↗</a></div>'+
+            '<div class="section-cta">'+checkoutButtons('diagnostico_qualificado')+'</div>'+
           '</div>';
       }else{
         const motivo=!t.owner
